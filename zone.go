@@ -18,7 +18,7 @@ type Zone struct {
 }
 
 // Function to create a new zone struct
-func (z *Zone) Init(name string) *Zone {
+func (z *Zone) Init() *Zone {
 	z.Brand = Brand.Ipkg()
 	z.State = State.Incomplete()
 	z.ZonePath = ""
