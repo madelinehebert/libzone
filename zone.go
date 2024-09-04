@@ -1,7 +1,5 @@
 package libzone
 
-import "container/list"
-
 // Set default zone
 const defaultZonePath string = "/zones"
 
@@ -13,8 +11,11 @@ type Zone struct {
 	ZonePath string
 	AutoBoot bool
 	IpType   IpType
-	Net      *list.List
-	AttrList *list.List
+	AttrList map[uint]any
+	Dataset  map[uint]any
+	Device   map[uint]any
+	Fs       map[uint]any
+	Net      map[uint]any
 }
 
 // Function to create a new zone struct
@@ -24,6 +25,36 @@ func (z *Zone) Init() *Zone {
 	z.ZonePath = ""
 	z.AutoBoot = false
 	return z
+}
+
+// Function to return the value of a specified zone's property
+func Return(i any, propertyIndex uint, field string) any {
+	return i.(map[uint]any)[propertyIndex].(*Property).Value.(map[string]any)[field]
+}
+
+// Function to return the value of a specified net property
+func (z *Zone) ReturnAttrList(propertyIndex uint, field string) any {
+	return z.AttrList[propertyIndex].(*Property).Value.(map[string]any)[field]
+}
+
+// Function to return the value of a specified net property
+func (z *Zone) ReturnDataset(propertyIndex uint, field string) any {
+	return z.Dataset[propertyIndex].(*Property).Value.(map[string]any)[field]
+}
+
+// Function to return the value of a specified net property
+func (z *Zone) ReturnDevice(propertyIndex uint, field string) any {
+	return z.Device[propertyIndex].(*Property).Value.(map[string]any)[field]
+}
+
+// Function to return the value of a specified net property
+func (z *Zone) ReturnFs(propertyIndex uint, field string) any {
+	return z.Fs[propertyIndex].(*Property).Value.(map[string]any)[field]
+}
+
+// Function to return the value of a specified net property
+func (z *Zone) ReturnNet(propertyIndex uint, field string) any {
+	return z.Net[propertyIndex].(*Property).Value.(map[string]any)[field]
 }
 
 // Function to boot a zone

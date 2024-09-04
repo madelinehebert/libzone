@@ -1,5 +1,9 @@
 package libzone
 
+import (
+	"strconv"
+)
+
 type brand byte
 
 const (
@@ -14,6 +18,35 @@ const (
 	Emu
 	S10
 )
+
+// Function to return the human readable version of a brand
+func (b brand) String() string {
+	//Convert brand byte to string
+	switch b {
+	case Ipkg:
+		return "Ipkg"
+	case Lipkg:
+		return "Lipkg"
+	case Sparse:
+		return "Sparse"
+	case Pkgsrc:
+		return "Pkgsrc"
+	case Lx:
+		return "Lx"
+	case Bhyve:
+		return "Bhyve"
+	case Kvm:
+		return "Kvm"
+	case Illumos:
+		return "Illumos"
+	case Emu:
+		return "Emu"
+	case S10:
+		return "S10"
+	}
+
+	return "Unknown: " + strconv.Itoa(int(b))
+}
 
 func (b brand) Ipkg() brand {
 	return Ipkg
