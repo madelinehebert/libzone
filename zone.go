@@ -24,6 +24,11 @@ type Zone struct {
 
 // Function to return the value of a specified zone's property
 func Return(i any, propertyIndex byte, field string) any {
+	// Defer panic
+	defer func(any) {
+		recover()
+	}(nil)
+
 	if i.(map[byte]any) != nil {
 		return i.(map[byte]any)[propertyIndex].(*Property).Value.(map[string]any)[field]
 	} else {
@@ -110,6 +115,9 @@ func (z *Zone) ReturnNet(propertyIndex byte, field string) any {
 	}
 
 }
+
+// Function to write configuration to disk
+func (z *Zone) Write() error { return nil }
 
 // Function to boot a zone
 func (z *Zone) Boot() error { return nil }
