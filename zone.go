@@ -1,5 +1,7 @@
 package libzone
 
+import "log"
+
 // Set default zone
 const defaultZonePath string = "/zones"
 
@@ -11,11 +13,16 @@ type Zone struct {
 	ZonePath string
 	AutoBoot bool
 	IpType   IpType
-	AttrList map[uint]any
-	Dataset  map[uint]any
-	Device   map[uint]any
-	Fs       map[uint]any
-	Net      map[uint]any
+	AttrList map[byte]any
+	Dataset  map[byte]any
+	Device   map[byte]any
+	Fs       map[byte]any
+	Net      map[byte]any
+}
+
+// Function to return the value of a specified zone's property
+func Return(i any, propertyIndex byte, field string) any {
+	return i.(map[byte]any)[propertyIndex].(*Property).Value.(map[string]any)[field]
 }
 
 // Function to create a new zone struct
@@ -24,36 +31,56 @@ func (z *Zone) Init() *Zone {
 	z.State = State.Incomplete()
 	z.ZonePath = ""
 	z.AutoBoot = false
+	z.AttrList = make(map[byte]any)
+	z.Dataset = make(map[byte]any)
+	z.Device = make(map[byte]any)
+	z.Fs = make(map[byte]any)
+	z.Net = make(map[byte]any)
 	return z
 }
 
-// Function to return the value of a specified zone's property
-func Return(i any, propertyIndex uint, field string) any {
-	return i.(map[uint]any)[propertyIndex].(*Property).Value.(map[string]any)[field]
+// Function to add a property type to a zone
+func (z *Zone) Add(p string) *Zone {
+	switch p {
+	case "attrList":
+		z.AttrList[byte(len(z.AttrList))] = (&Property{}).Fs()
+	case "dataset":
+		z.Dataset[byte(len(z.Dataset))] = (&Property{}).Fs()
+	case "device":
+		z.Device[byte(len(z.Device))] = (&Property{}).Fs()
+	case "fs":
+		z.Fs[byte(len(z.Fs))] = (&Property{}).Fs()
+	case "net":
+		z.Net[byte(len(z.Net))] = (&Property{}).Net()
+	default:
+		log.Printf("Unknown property: '%s'\n", p)
+	}
+
+	return z
 }
 
 // Function to return the value of a specified net property
-func (z *Zone) ReturnAttrList(propertyIndex uint, field string) any {
+func (z *Zone) ReturnAttrList(propertyIndex byte, field string) any {
 	return z.AttrList[propertyIndex].(*Property).Value.(map[string]any)[field]
 }
 
 // Function to return the value of a specified net property
-func (z *Zone) ReturnDataset(propertyIndex uint, field string) any {
+func (z *Zone) ReturnDataset(propertyIndex byte, field string) any {
 	return z.Dataset[propertyIndex].(*Property).Value.(map[string]any)[field]
 }
 
 // Function to return the value of a specified net property
-func (z *Zone) ReturnDevice(propertyIndex uint, field string) any {
+func (z *Zone) ReturnDevice(propertyIndex byte, field string) any {
 	return z.Device[propertyIndex].(*Property).Value.(map[string]any)[field]
 }
 
 // Function to return the value of a specified net property
-func (z *Zone) ReturnFs(propertyIndex uint, field string) any {
+func (z *Zone) ReturnFs(propertyIndex byte, field string) any {
 	return z.Fs[propertyIndex].(*Property).Value.(map[string]any)[field]
 }
 
 // Function to return the value of a specified net property
-func (z *Zone) ReturnNet(propertyIndex uint, field string) any {
+func (z *Zone) ReturnNet(propertyIndex byte, field string) any {
 	return z.Net[propertyIndex].(*Property).Value.(map[string]any)[field]
 }
 

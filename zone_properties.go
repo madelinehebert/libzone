@@ -8,6 +8,33 @@ type Property struct {
 }
 
 // Define new Fs Property
+func (p *Property) AttrList() *Property {
+	v := make(map[string]any, 3)
+	v["name"] = ""
+	v["type"] = ""
+	v["value"] = nil
+	p.Value = v
+	return p
+}
+
+// Define new Fs Property
+func (p *Property) Dataset() *Property {
+	v := make(map[string]any, 1)
+	v["name"] = ""
+	p.Value = v
+	return p
+}
+
+// Define new Fs Property
+func (p *Property) Device() *Property {
+	v := make(map[string]any, 2)
+	v["match"] = ""
+	v["property"] = make(map[string]string)
+	p.Value = v
+	return p
+}
+
+// Define new Fs Property
 func (p *Property) Fs() *Property {
 	v := make(map[string]any, 5)
 	v["dir"] = ""
