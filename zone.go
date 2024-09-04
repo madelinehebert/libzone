@@ -1,6 +1,8 @@
 package libzone
 
-import "log"
+import (
+	"log"
+)
 
 // Set default zone
 const defaultZonePath string = "/zones"
@@ -22,7 +24,11 @@ type Zone struct {
 
 // Function to return the value of a specified zone's property
 func Return(i any, propertyIndex byte, field string) any {
-	return i.(map[byte]any)[propertyIndex].(*Property).Value.(map[string]any)[field]
+	if i.(map[byte]any) != nil {
+		return i.(map[byte]any)[propertyIndex].(*Property).Value.(map[string]any)[field]
+	} else {
+		return nil
+	}
 }
 
 // Function to create a new zone struct
@@ -61,27 +67,48 @@ func (z *Zone) Add(p string) *Zone {
 
 // Function to return the value of a specified net property
 func (z *Zone) ReturnAttrList(propertyIndex byte, field string) any {
-	return z.AttrList[propertyIndex].(*Property).Value.(map[string]any)[field]
+	if z.AttrList != nil {
+		return z.AttrList[propertyIndex].(*Property).Value.(map[string]any)[field]
+	} else {
+		return nil
+	}
 }
 
 // Function to return the value of a specified net property
 func (z *Zone) ReturnDataset(propertyIndex byte, field string) any {
-	return z.Dataset[propertyIndex].(*Property).Value.(map[string]any)[field]
+	if z.Dataset != nil {
+		return z.Dataset[propertyIndex].(*Property).Value.(map[string]any)[field]
+	} else {
+		return nil
+	}
 }
 
 // Function to return the value of a specified net property
 func (z *Zone) ReturnDevice(propertyIndex byte, field string) any {
-	return z.Device[propertyIndex].(*Property).Value.(map[string]any)[field]
+	if z.Device != nil {
+		return z.Device[propertyIndex].(*Property).Value.(map[string]any)[field]
+	} else {
+		return nil
+	}
 }
 
 // Function to return the value of a specified net property
 func (z *Zone) ReturnFs(propertyIndex byte, field string) any {
-	return z.Fs[propertyIndex].(*Property).Value.(map[string]any)[field]
+	if z.Net != nil {
+		return z.Fs[propertyIndex].(*Property).Value.(map[string]any)[field]
+	} else {
+		return nil
+	}
 }
 
 // Function to return the value of a specified net property
 func (z *Zone) ReturnNet(propertyIndex byte, field string) any {
-	return z.Net[propertyIndex].(*Property).Value.(map[string]any)[field]
+	if z.Net != nil {
+		return z.Net[propertyIndex].(*Property).Value.(map[string]any)[field]
+	} else {
+		return nil
+	}
+
 }
 
 // Function to boot a zone
