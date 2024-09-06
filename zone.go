@@ -1,7 +1,9 @@
 package libzone
 
 import (
+	"errors"
 	"log"
+	"strings"
 )
 
 // Set default zone
@@ -22,20 +24,6 @@ type Zone struct {
 	Net      map[byte]any
 }
 
-// Function to return the value of a specified zone's property
-func Return(i any, propertyIndex byte, field string) any {
-	// Defer panic
-	defer func(any) {
-		recover()
-	}(nil)
-
-	if i.(map[byte]any) != nil {
-		return i.(map[byte]any)[propertyIndex].(*Property).Value.(map[string]any)[field]
-	} else {
-		return nil
-	}
-}
-
 // Function to create a new zone struct
 func (z *Zone) Init() *Zone {
 	z.Brand = Brand.Ipkg()
@@ -54,11 +42,11 @@ func (z *Zone) Init() *Zone {
 func (z *Zone) Add(p string) *Zone {
 	switch p {
 	case "attrList":
-		z.AttrList[byte(len(z.AttrList))] = (&Property{}).Fs()
+		z.AttrList[byte(len(z.AttrList))] = (&Property{}).AttrList()
 	case "dataset":
-		z.Dataset[byte(len(z.Dataset))] = (&Property{}).Fs()
+		z.Dataset[byte(len(z.Dataset))] = (&Property{}).Dataset()
 	case "device":
-		z.Device[byte(len(z.Device))] = (&Property{}).Fs()
+		z.Device[byte(len(z.Device))] = (&Property{}).Device()
 	case "fs":
 		z.Fs[byte(len(z.Fs))] = (&Property{}).Fs()
 	case "net":
@@ -68,6 +56,88 @@ func (z *Zone) Add(p string) *Zone {
 	}
 
 	return z
+}
+
+// Function to configure a device - The 'item' is the property name, the 'id' is the index of that property type,
+// the 'key' is the field, and the 'val' is the value of the field. Invalid indices return errors.
+func (z *Zone) Configure(item string, id byte, key string, val string) error {
+	item = strings.ToLower(item)
+	switch item {
+	//Configure Attr List
+	case "attrlist":
+		//Check length of map
+		if len(z.AttrList) >= int(id)+1 {
+			if err := z.AttrList[id].(*Property).Set(key, val); err != nil {
+				return err
+			} else {
+				return nil
+			}
+		} else {
+			return errors.New("invalid index")
+		}
+
+	//Configure Dataset
+	case "dataset":
+		//Check length of map
+		if len(z.Dataset) >= int(id)+1 {
+			if err := z.Dataset[id].(*Property).Set(key, val); err != nil {
+				return err
+			} else {
+				return nil
+			}
+		} else {
+			return errors.New("invalid index")
+		}
+	//Configure Device
+	case "device":
+		//Check length of map
+		if len(z.Device) >= int(id)+1 {
+			if err := z.Device[id].(*Property).Set(key, val); err != nil {
+				return err
+			} else {
+				return nil
+			}
+		} else {
+			return errors.New("invalid index")
+		}
+	//Configure Fs
+	case "fs":
+		//Check length of map
+		if len(z.Fs) >= int(id)+1 {
+			if err := z.Fs[id].(*Property).Set(key, val); err != nil {
+				return err
+			} else {
+				return nil
+			}
+		} else {
+			return errors.New("invalid index")
+		}
+	//Configure Net
+	case "net":
+		//Check length of map
+		if len(z.Net) >= int(id)+1 {
+			if err := z.Net[id].(*Property).Set(key, val); err != nil {
+				return err
+			} else {
+				return nil
+			}
+		} else {
+			return errors.New("invalid index")
+		}
+	//Handle unknown property
+	default:
+		return errors.New("unknown property: " + item)
+	}
+
+}
+
+// Function to configure a device
+func (z *Zone) ConfigureDevice(id byte, key string, val string) error {
+	if err := z.Device[id].(*Property).Set(key, val); err != nil {
+		return err
+	} else {
+		return nil
+	}
 }
 
 // Function to return the value of a specified net property

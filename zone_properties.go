@@ -1,10 +1,30 @@
 package libzone
 
-import "container/list"
+import (
+	"container/list"
+	"errors"
+	"reflect"
+)
 
 // Define exported Property struct
 type Property struct {
 	Value any
+}
+
+// Configure a property - key is the field name, val is the value
+func (p *Property) Set(key string, val string) error {
+	//Loop over property keys and values
+	for k, v := range p.Value.(map[string]any) {
+		//If we have a string
+		if reflect.TypeOf(v) == reflect.TypeOf(key) && k == key {
+			p.Value.(map[string]any)[k] = val
+			return nil
+		} else if reflect.TypeOf(v) == reflect.TypeOf(make(map[string]string)) {
+			return nil
+		}
+	}
+
+	return errors.New("")
 }
 
 // Define new Fs Property
