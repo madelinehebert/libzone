@@ -1,8 +1,11 @@
 package libzone
 
 import (
+	"container/list"
 	"errors"
-	"log"
+	"fmt"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -25,7 +28,8 @@ type Zone struct {
 }
 
 // Function to create a new zone struct
-func (z *Zone) Init() *Zone {
+func (z *Zone) Init(name string) *Zone {
+	z.Name = name
 	z.Brand = Brand.Ipkg()
 	z.State = State.Incomplete()
 	z.ZonePath = ""
@@ -38,10 +42,89 @@ func (z *Zone) Init() *Zone {
 	return z
 }
 
+// Function to print out the zone's information
+func (z *Zone) Info() {
+	//Loop over zone and print data in the same format as 'zonecfg -z *Zone export'
+	zStructValue := reflect.ValueOf(*z)
+	zStructType := reflect.TypeOf(*z)
+	for i := 0; i < zStructValue.NumField(); i++ {
+		//Switch on type
+		switch reflect.TypeOf(zStructValue.Field(i).Interface()) {
+
+		//If we have a string
+		case reflect.TypeOf(""):
+			if len(zStructValue.Field(i).Interface().(string)) != 0 {
+				if zStructType.Field(i).Name == "Name" {
+					fmt.Printf("%20s: %-20s\n", strings.ToLower(zStructType.Field(i).Name), zStructValue.Field(i).Interface().(string))
+				} else {
+					//fmt.Printf("%20s=%-20s\n", "set "+strings.ToLower(zStructType.Field(i).Name), zStructValue.Field(i).Interface().(string))
+					fmt.Printf("%20s: %-20s\n", strings.ToLower(zStructType.Field(i).Name), zStructValue.Field(i).Interface().(string))
+				}
+
+			} else {
+				//fmt.Printf("%20s=%-20s\n", "set "+strings.ToLower(zStructType.Field(i).Name), "<nil>")
+				fmt.Printf("%20s: %-20s\n", strings.ToLower(zStructType.Field(i).Name), "<nil>")
+			}
+
+		//If we have a bool
+		case reflect.TypeOf(true):
+			fmt.Printf("%20s: %-20v\n", zStructType.Field(i).Name, zStructValue.Field(i).Interface().(bool))
+
+		//If we have a map[byte]any
+		case reflect.TypeOf(make(map[byte]any)):
+
+			//Ensure we aren't trying to print an empty value
+			if len(zStructValue.Field(i).Interface().(map[byte]any)) != 0 {
+				//Loop over values
+				for key, _ := range zStructValue.Field(i).Interface().(map[byte]any) {
+
+					//Print item header with number
+					fmt.Printf("%20s: %-20s\n", zStructType.Field(i).Name+" #"+strconv.Itoa(int(key)+1), "")
+
+					//Loop over sub values
+					for subKey, subVal := range zStructValue.Field(i).Interface().(map[byte]any)[key].(*Property).Value.(map[string]any) {
+						//Check type
+						switch reflect.TypeOf(subVal) {
+						//string
+						case reflect.TypeOf(""):
+							if len(subVal.(string)) != 0 {
+								fmt.Printf("%20s: %-20s\n", " - "+subKey, subVal.(string))
+							} else {
+								fmt.Printf("%20s: %-20s\n", " - "+subKey, "<nil>")
+							}
+
+						//map[string]string
+						case reflect.TypeOf(make(map[string]string)):
+							fmt.Printf("%20s: %-20s\n", " - "+subKey, "NOT YET IMPLEMENTED")
+						//bool
+						case reflect.TypeOf(true):
+							fmt.Printf("%20s: %-20v\n", " - "+subKey, subVal.(bool))
+						//int
+						case reflect.TypeOf(1):
+							fmt.Printf("%20s: %-20v\n", " - "+subKey, subVal.(int))
+						//list
+						case reflect.TypeOf(&list.List{}):
+							fmt.Printf("%20s: %-20v\n", " - "+subKey, "NOT YET IMPLEMENTED")
+						//Unhandled types
+						default:
+							fmt.Printf("%20s: %-20v\n", " - "+subKey, "NOT YET IMPLEMENTED")
+						}
+					}
+				}
+
+			} else {
+				fmt.Printf("%20s: %-20s\n", zStructType.Field(i).Name, "<nil>")
+			}
+		}
+
+	}
+}
+
 // Function to add a property type to a zone
-func (z *Zone) Add(p string) *Zone {
+func (z *Zone) Add(p string) error {
+	p = strings.ToLower(p)
 	switch p {
-	case "attrList":
+	case "attrlist":
 		z.AttrList[byte(len(z.AttrList))] = (&Property{}).AttrList()
 	case "dataset":
 		z.Dataset[byte(len(z.Dataset))] = (&Property{}).Dataset()
@@ -52,10 +135,10 @@ func (z *Zone) Add(p string) *Zone {
 	case "net":
 		z.Net[byte(len(z.Net))] = (&Property{}).Net()
 	default:
-		log.Printf("Unknown property: '%s'\n", p)
+		return errors.New("Unknown property: " + p)
 	}
 
-	return z
+	return nil
 }
 
 // Function to configure a device - The 'item' is the property name, the 'id' is the index of that property type,
